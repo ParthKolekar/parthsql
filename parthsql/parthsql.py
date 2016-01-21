@@ -62,8 +62,28 @@ class Database(object):
             )
         )
 
-        with open(METADATA_FILE, "rw") as f:
+        with open(METADATA_FILE, "w") as f:
             f.write(string_buffer)
+
+    def delete_table(self, tablename):
+        """
+            Deletes a table from the database.
+        """
+        self.tables = filter(lambda x: x.name != tablename, self.tables)
+
+    def get_table(self, tablename):
+        """
+            Returns the table whoose name is tablename.
+        """
+        return filter(lambda x: x.name == tablename, self.tables)[0]
+
+    def print_contents(self):
+        print os.linesep.join(
+            map(
+                lambda x: x.name,
+                self.tables
+            )
+        )
 
     def __str__(self):
         """
@@ -137,7 +157,7 @@ class Table(object):
             )
         )
 
-        with open(self.name + ".csv", "rw") as f:
+        with open(self.name + ".csv", "w") as f:
             f.write(string_buffer)
 
     def __str__(self):
