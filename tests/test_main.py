@@ -2,18 +2,18 @@
 # -*- coding: utf-8 -*-
 
 """
-test_parthsql
+test_main
 ----------------------------------
 
-Tests for `parthsql` module.
+Tests for `main` module.
 """
 
 import unittest
 
-from parthsql import parthsql
+from parthsql import main
 
 
-class TestParthsql(unittest.TestCase):
+class TestMain(unittest.TestCase):
 
     def setUp(self):
         pass
