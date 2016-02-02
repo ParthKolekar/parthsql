@@ -24,7 +24,7 @@ test_requirements = [
 
 setup(
     name='parthsql',
-    version='1.0.0',
+    version='1.1.0',
     description="A mini SQL query engine written in Python",
     long_description=readme + '\n\n' + history,
     author="Parth Kolekar",
