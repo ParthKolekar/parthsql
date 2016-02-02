@@ -46,12 +46,9 @@ class Database(object):
         )
 
         for iterator in list_of_databases_and_columns:
-            self.tables.append(
-                Table(
-                    name=iterator[0],
-                    columns=iterator[1:][:],
-                    rows=[]
-                )
+            self.create_table_raw(
+                tablename=iterator[0],
+                columns=iterator[1:][:],
             )
 
         for i in self.tables:
@@ -75,6 +72,21 @@ class Database(object):
 
         for i in self.tables:
             i.store_contents()
+
+    def create_table(self, table):
+        """
+            Adds table to Database
+        """
+        self.tables.append(table)
+
+    def create_table_raw(self, tablename, columns):
+        self.tables.append(
+            Table(
+                name=tablename,
+                columns=columns,
+                rows=[]
+            )
+        )
 
     def delete_table(self, tablename):
         """
@@ -121,14 +133,65 @@ class Table(object):
         self.columns = columns
         self.rows = rows
 
+    def get_column_list_prefixed(self):
+        """
+            Returns a list of columns
+        """
+        return map(
+            lambda x: ".".join([self.name, x]),
+            self.columns
+        )
+
     def get_column(self, column):
         """
             Return the values having of column.
         """
-        return map(
+        if "(" in str(column):
+            temp_list = column.split("(")
+            key = temp_list[1].strip("()")
+            func = temp_list[0].lower()
+        else:
+            key = column
+            func = None
+
+        if "." not in key:
+            for i in self.columns:
+                if i.split(".")[1] == key:
+                    key = i
+
+        col = map(
             lambda x: x.get(
-                column
+                key
             ),
+            self.rows
+        )
+
+        if func is not None:
+            if func == "sum":
+                return [sum(col)]
+            elif func == "max":
+                return [max(col)]
+            elif func == "min":
+                return [min(col)]
+            elif func == "avg":
+                return [sum(col) / float(len(col))]
+            elif func == "count":
+                return [len(col)]
+            elif func == "distinct":
+                return list(set(col))
+            else:
+                raise Exception(
+                    "Unknown function called on column"
+                )
+
+        return col
+
+    def get_all_rows(self):
+        """
+            Returns all values from the table.
+        """
+        return map(
+            lambda x: x.values(),
             self.rows
         )
 
@@ -193,16 +256,20 @@ class Table(object):
         """
             Prints Contents of Table.
         """
-
-        return os.linesep.join(
+        print os.linesep.join(
             map(
                 self.make_output_row,
-                self.rows()
+                self.rows
             ),
         )
 
     def make_output_row(self, row):
-        print self, row
+        return "\t\t".join(
+            map(
+                str,
+                row.values()
+            )
+        )
 
     def __str__(self):
         """

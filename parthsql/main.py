@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sqlparse
+import itertools
 
 from . import parthsql
 
@@ -98,11 +99,11 @@ def main():
                         table.store_contents()
                     else:
                         raise Exception(
-                            "Invalid Syntax of INSERT INTO t VALUES (v,v,v...)"
+                            "Invalid Syntax of INSERT INTO t VALUES (v...)"
                         )
                 else:
                     raise Exception(
-                        "Invalid Syntax of INSERT INTO t VALUES (v,v,v...)"
+                        "Invalid Syntax of INSERT INTO t VALUES (v...)"
                     )
             elif str(type).lower() == "create":
                 if str(statement.tokens[2]).lower() == "table":
@@ -113,14 +114,74 @@ def main():
                         lambda x: x.strip(" ()",).split()[0],
                         garbage.split(",")
                     )
-                    DATABASE.tables.append(
-                        parthsql.Table(
-                            name=tablename,
-                            columns=column_list[:],
-                            rows=[]
-                        )
+                    DATABASE.create_table_raw(
+                        tablename=tablename,
+                        columns=column_list[:],
                     )
                     DATABASE.store_contents()
+            elif str(type).lower() == "select":
+                col_list_or_single = statement.tokens[2]
+                if "," not in str(col_list_or_single):
+                    if str(col_list_or_single) == "*":
+                        column_list = ['*']
+                    else:
+                        column_list = [str(col_list_or_single)]
+                else:
+                    column_list = map(
+                        lambda x: str(x),
+                        col_list_or_single.get_identifiers()
+                    )
+                if str(statement.tokens[4]).lower() == "from":
+                    tab_list_or_single = statement.tokens[6]
+                    if "," not in str(tab_list_or_single):
+                        table_list = [str(tab_list_or_single)]
+                    else:
+                        table_list = map(
+                            lambda x: str(x),
+                            tab_list_or_single.get_identifiers()
+                        )
+                    cross_columns = reduce(
+                        lambda x, y: x + y,
+                        map(
+                            lambda x: DATABASE.get_table(
+                                x
+                            ).get_column_list_prefixed(),
+                            table_list
+                        )
+                    )
+                    cross_table = parthsql.Table(
+                        name="temp",
+                        columns=cross_columns,
+                        rows=[]
+                    )
+                    for i in itertools.product(
+                        *map(
+                            lambda x: DATABASE.get_table(x).get_all_rows(),
+                            table_list
+                        )
+                    ):
+                        cross_table.put_row_raw(
+                            reduce(
+                                lambda x, y: x + y,
+                                i
+                            )
+                        )
+                    if "*" in column_list:
+                        cross_table.print_contents()
+                    else:
+                        temp_list = []
+                        for i in column_list:
+                            temp_list.append(cross_table.get_column(i))
+                        for i in zip(*(temp_list)):
+                            print "\t\t".join(map(str, i))
+                else:
+                    raise Exception(
+                        "Invalid Syntax of SELECT c... FROM t... WHERE k = v"
+                    )
+            else:
+                raise Exception(
+                    "Unsupported Operation"
+                )
 
 
 if __name__ == "__main__":
