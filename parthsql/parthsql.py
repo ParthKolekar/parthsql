@@ -6,7 +6,15 @@ METADATA_FILE = "metadata.txt"
 
 
 def make_row(columns, values):
-    return dict(zip(columns, values))
+    return dict(
+        zip(
+            columns,
+            map(
+                lambda x: int(x),
+                values
+            )
+        )
+    )
 
 
 class Database(object):
@@ -47,7 +55,7 @@ class Database(object):
             )
 
         for i in self.tables:
-            i.load_contents
+            i.load_contents()
 
     def store_contents(self):
         """
@@ -65,6 +73,9 @@ class Database(object):
         with open(METADATA_FILE, "w") as f:
             f.write(string_buffer)
 
+        for i in self.tables:
+            i.store_contents()
+
     def delete_table(self, tablename):
         """
             Deletes a table from the database.
@@ -75,7 +86,10 @@ class Database(object):
         """
             Returns the table whoose name is tablename.
         """
-        return filter(lambda x: x.name == tablename, self.tables)[0]
+        temp = filter(lambda x: x.name == tablename, self.tables)
+        if temp == list():
+            raise Exception("No such table")
+        return temp[0]
 
     def print_contents(self):
         print os.linesep.join(
@@ -124,11 +138,17 @@ class Table(object):
         """
         self.rows.append(row)
 
+    def put_row_raw(self, row):
+        """
+            Adds a raw raw by first making it to a proper row.
+        """
+        self.put_row(make_row(self.columns, row))
+
     def delete_row(self, key, value):
         """
             Deletes the rows where key = value.
         """
-        self.rows = filter(lambda x: x.get(key) is not value, self.rows)
+        self.rows = filter(lambda x: x.get(key) != value, self.rows)
 
     def load_contents(self):
         """
@@ -137,7 +157,13 @@ class Table(object):
         with open(self.name + ".csv") as f:
             list_of_rows = f.readlines()
 
-        list_of_rows = map(lambda x: x.strip(), list_of_rows)
+        list_of_rows = map(
+            lambda x: x.strip(),
+            map(
+                lambda x: x.replace("\"", ""),
+                list_of_rows
+            )
+        )
 
         for row in list_of_rows:
             self.put_row(make_row(self.columns, row.split(',')))
@@ -151,7 +177,10 @@ class Table(object):
             map(
                 lambda x: ",".join(x),
                 map(
-                    lambda x: x.values(),
+                    lambda x: map(
+                        str,
+                        x.values()
+                    ),
                     self.rows
                 )
             )
@@ -159,6 +188,21 @@ class Table(object):
 
         with open(self.name + ".csv", "w") as f:
             f.write(string_buffer)
+
+    def print_contents(self):
+        """
+            Prints Contents of Table.
+        """
+
+        return os.linesep.join(
+            map(
+                self.make_output_row,
+                self.rows()
+            ),
+        )
+
+    def make_output_row(self, row):
+        print self, row
 
     def __str__(self):
         """
