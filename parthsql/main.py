@@ -41,7 +41,7 @@ def main():
                 )
             )[0]
             type = statement.tokens[0]
-            print statement.tokens
+            
             if str(type).lower() == "drop":
                 if str(statement.tokens[2]).lower() == "table":
                     tablename = str(statement.tokens[4])
