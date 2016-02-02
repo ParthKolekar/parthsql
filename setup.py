@@ -14,8 +14,9 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-with open('requirements.txt') as requirements_file:
-    requirements = requirements_file.read().split('\n')
+requirements = [
+        'sqlparse==0.1.18'
+    ]
 
 test_requirements = [
     # TODO: put package test requirements here
