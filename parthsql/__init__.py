@@ -2,4 +2,4 @@
 
 __author__ = 'Parth Kolekar'
 __email__ = 'parth.kolekar@students.iiit.ac.in'
-__version__ = '0.4.0'
+__version__ = '0.5.0'
