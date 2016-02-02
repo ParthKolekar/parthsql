@@ -158,6 +158,7 @@ class Table(object):
             for i in self.columns:
                 if i.split(".")[1] == key:
                     key = i
+                    break
 
         col = map(
             lambda x: x.get(
@@ -263,20 +264,11 @@ class Table(object):
             Prints Contents of Table.
         """
         print "\t\t\t".join(self.columns)
-        print os.linesep.join(
-            map(
-                self.make_output_row,
-                self.rows
-            ),
-        )
-
-    def make_output_row(self, row):
-        return "\t\t\t".join(
-            map(
-                str,
-                row.values()
-            )
-        )
+        temp_list = []
+        for i in self.columns:
+            temp_list.append(self.get_column(i))
+        for i in zip(*(temp_list)):
+            print "\t\t\t".join(map(str, i))
 
     def __str__(self):
         """
