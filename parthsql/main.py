@@ -169,8 +169,12 @@ def main():
                             if str(whereclause.tokens[0]).lower() == "where":
                                 comparison = whereclause.tokens[2]
                                 key = str(comparison.tokens[0])
-                                value = int(str(comparison.tokens[4]))
-                                cross_table.invert_delete_row(key, value)
+                                try:
+                                    value = int(str(comparison.tokens[4]))
+                                    cross_table.invert_delete_row(key, value)
+                                except:
+                                    value = str(comparison.tokens[4])
+                                    cross_table.invert_delete_row2(key, value)
                             else:
                                 raise Exception(
                                     "Invalid Syntax of DELETE FROM t where k = v"

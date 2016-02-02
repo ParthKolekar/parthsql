@@ -220,6 +220,12 @@ class Table(object):
         """
         self.rows = filter(lambda x: x.get(key) == value, self.rows)
 
+    def invert_delete_row2(self, key, value):
+        """
+            Invert of type two where there are two columns given
+        """
+        self.rows = filter(lambda x: x.get(key) == x.get(value), self.rows)
+
     def load_contents(self):
         """
             Loads contents of Database from a filename database.csv.
