@@ -166,14 +166,29 @@ def main():
                                 i
                             )
                         )
+
+                    if len(statement.tokens) >= 9:
+                        whereclause = statement.tokens[8]
+                        if str(whereclause.tokens[0]).lower() == "where":
+                            comparison = whereclause.tokens[2]
+                            key = str(comparison.tokens[0])
+                            value = int(str(comparison.tokens[4]))
+                            print key,value
+                            cross_table.invert_delete_row(key, value)
+                        else:
+                            raise Exception(
+                                "Invalid Syntax of DELETE FROM t where k = v"
+                            )
+
                     if "*" in column_list:
                         cross_table.print_contents()
                     else:
                         temp_list = []
                         for i in column_list:
                             temp_list.append(cross_table.get_column(i))
+                        print "\t\t\t".join(column_list)
                         for i in zip(*(temp_list)):
-                            print "\t\t".join(map(str, i))
+                            print "\t\t\t".join(map(str, i))
                 else:
                     raise Exception(
                         "Invalid Syntax of SELECT c... FROM t... WHERE k = v"

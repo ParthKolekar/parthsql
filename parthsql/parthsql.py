@@ -213,6 +213,12 @@ class Table(object):
         """
         self.rows = filter(lambda x: x.get(key) != value, self.rows)
 
+    def invert_delete_row(self, key, value):
+        """
+            Inverts delete_row and returns the rows where key = value
+        """
+        self.rows = filter(lambda x: x.get(key) == value, self.rows)
+
     def load_contents(self):
         """
             Loads contents of Database from a filename database.csv.
@@ -256,6 +262,7 @@ class Table(object):
         """
             Prints Contents of Table.
         """
+        print "\t\t\t".join(self.columns)
         print os.linesep.join(
             map(
                 self.make_output_row,
@@ -264,7 +271,7 @@ class Table(object):
         )
 
     def make_output_row(self, row):
-        return "\t\t".join(
+        return "\t\t\t".join(
             map(
                 str,
                 row.values()
